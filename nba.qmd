@@ -42,3 +42,32 @@ table_rough <- nba %>%
 table_rough
 ```
 
+```{r}
+box_score_raptor <- c("raptor_box_offense, raptor_box_defense, raptor_box_total")
+
+```
+
+
+
+```{r}
+# # Install and load required packages
+# install.packages("kableExtra")
+# library(kableExtra)
+# 
+# # Sample data
+# data <- data.frame(Category = c("A", "B", "C", "D"),
+#                    Value = c(30, 50, 80, 20))
+# 
+# # Calculate percentage values
+# data$Percentage <- data$Value / sum(data$Value) * 100
+# 
+# # Create a table with bars
+# table_with_bars <- kable(data, format = "html", escape = FALSE) %>%
+#   kable_styling() %>%
+#   column_spec(2, width = "10%", extra_css = "background: lightblue;") %>%
+#   column_spec(3, width = "30%", extra_css = "background: lightblue;")
+# 
+# # Print the table
+# print(table_with_bars)
+```
+
