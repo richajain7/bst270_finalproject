@@ -1,0 +1,44 @@
+---
+title: "nba"
+format: html
+---
+
+
+```{r}
+library(reactable)
+library(htmltools)
+```
+
+```{r}
+latest_raptor_player <- read.csv("datasets/latest_RAPTOR_by_player.csv") 
+head(latest_raptor_player, 1)
+
+latest_raptor_team <- read.csv("datasets/latest_RAPTOR_by_team.csv") 
+head(latest_raptor_team, 1)
+```
+
+```{r}
+unique(latest_raptor_team$season_type) 
+#latest_raptor_team [latest_raptor_team$poss == 431]
+```
+
+ #Note : We can't reproduce the table perfectly because the positions must have been manually added in
+
+```{r}
+nba <- latest_raptor_player %>% 
+  left_join(select(latest_raptor_team, player_name, team), by = "player_name") %>% 
+  distinct()
+head(nba)
+```
+
+```{r}
+table_rough <- nba %>% 
+  select(player_name, team, mp, raptor_box_offense, raptor_box_defense, raptor_box_total,
+ raptor_onoff_offense, raptor_onoff_defense, raptor_onoff_total, 
+ raptor_offense, raptor_defense, raptor_defense, war_total) %>% 
+  filter(mp >= 1137) %>% 
+  arrange(-war_total)
+
+table_rough
+```
+
