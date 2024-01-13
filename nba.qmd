@@ -111,6 +111,7 @@ nba_gen <- nba_gen %>%
   )
 
 nba_gen$MINUTES <- format(nba_gen$MINUTES,big.mark=", ", trim=TRUE)
+nba_gen$season <- nba_gen$season %% 100
 ```
 
 ```{r}
@@ -134,6 +135,20 @@ blue_pal <- function(x) rgb(colorRamp(c("#fa8072", "white", "#35b0ab"))(x), maxC
 table <- reactable(
   nba_gen,
   columns = list(
+    PLAYER = colDef(
+      cell = function(value, index) {
+        div(
+          class = "player",
+          div(
+            span(class = "player", value),
+            span(class = "season", sprintf(" '22-'%s", nba_gen[index, "season"]))
+          )
+        )
+      }
+    ),
+    season = colDef(show = FALSE),
+    #group = colDef(defaultSortOrder = "asc", align = "center", maxWidth = 75,
+    #               class = "cell group", headerStyle = list(fontWeight = 700)), 
       raptor_offense = colDef(style = function(value) {
       normalized <- (value - min(nba_gen$raptor_offense)) / (max(nba_gen$raptor_offense) - min(nba_gen$raptor_offense))
       color <- blue_pal(normalized)
@@ -238,8 +253,8 @@ table
 
 # Things to do: 
 - add season with player name 
-- borders
 - bold values in war column
+- borders
 
 ```{r}
 # # Install and load required packages
