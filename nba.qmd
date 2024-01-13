@@ -8,6 +8,7 @@ format: html
 library(reactable)
 library(htmltools)
 library(RColorBrewer)
+library(DT)
 #https://projects.fivethirtyeight.com/nba-player-ratings/
 ```
 
@@ -141,7 +142,9 @@ table <- reactable(
       name = "OFF.",
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
-      }),
+      },
+      headerStyle = list(fontWeight = "100",
+                         fontSize = "0.75rem")),
       
       raptor_defense = colDef(style = function(value) {
       normalized <- (value - min(nba_gen$raptor_defense)) / (max(nba_gen$raptor_defense) - min(nba_gen$raptor_defense))
@@ -151,7 +154,9 @@ table <- reactable(
       name = "DEF.",
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
-      }),
+      },
+      headerStyle = list(fontWeight = "100",
+                         fontSize = "0.75rem")),
       
       raptor_total = colDef(style = function(value) {
       normalized <- (value - min(nba_gen$raptor_total)) / (max(nba_gen$raptor_total) - min(nba_gen$raptor_total))
@@ -161,62 +166,80 @@ table <- reactable(
       name = "TOT.",
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
-      }),
+      },
+      headerStyle = list(fontWeight = "100",
+                         fontSize = "0.75rem")),
       
       raptor_box_offense = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
-      name = "OFF."),
+      name = "OFF.",
+      headerStyle = list(fontWeight = "100",
+                         fontSize = "0.75rem")),
       
       raptor_box_defense = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
-      name = "DEF."),
+      name = "DEF.",
+      headerStyle = list(fontWeight = "100",
+                         fontSize = "0.75rem")),
       
       raptor_box_total = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
-      name = "TOT."),
+      name = "TOT.",
+      headerStyle = list(fontWeight = "100",
+                         fontSize = "0.75rem")),
       
       raptor_onoff_offense = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
-      name = "OFF."),
+      name = "OFF.",
+      headerStyle = list(fontWeight = "100",
+                         fontSize = "0.75rem")),
       
       raptor_onoff_defense = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
-      name = "DEF."),
+      name = "DEF.",
+      headerStyle = list(fontWeight = "100",
+                         fontSize = "0.75rem")),
       
       raptor_onoff_total = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
-      name = "TOT."),
+      name = "TOT.",
+      headerStyle = list(fontWeight = "100",
+                         fontSize = "0.75rem")),
+      
       war_total = colDef(name = "WAR",
-                         headerStyle = list(background = "darkgrey"))
+                         headerStyle = list(background = "darkgrey",
+                                            color = "white",
+                                            fontWeight = "700",
+                                            fontSize = "0.75rem"))
   ),
   columnGroups = list(
-    colGroup(name = "BOX SCORE RAPTOR", columns = box_score_raptor),
-    colGroup(name = "ON/OFF RAPTOR", columns = on_off_raptor),
-    colGroup(name = "OVERALL RAPTOR", columns = overall_raptor)
+    colGroup(name = "BOX SCORE RAPTOR", columns = box_score_raptor, headerStyle = list(fontSize = "0.75rem")),
+    colGroup(name = "ON/OFF RAPTOR", columns = on_off_raptor, headerStyle = list(fontSize = "0.75rem")),
+    colGroup(name = "OVERALL RAPTOR", columns = overall_raptor, headerStyle = list(fontSize = "0.75rem"))
   ),
-  rownames = TRUE
+  rownames = TRUE,
+  defaultColDef = colDef(headerStyle = list(fontSize = "0.75rem"))
 )
 table
 ```
 
 
 # Things to do: 
-- add bold and unbold 
 - add season with player name 
-- highlight WAR column
 - borders
+- bold values in war column
 
 ```{r}
 # # Install and load required packages
