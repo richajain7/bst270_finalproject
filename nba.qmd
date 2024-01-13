@@ -8,6 +8,7 @@ format: html
 library(reactable)
 library(htmltools)
 library(RColorBrewer)
+#https://projects.fivethirtyeight.com/nba-player-ratings/
 ```
 
 ```{r}
@@ -131,38 +132,91 @@ blue_pal <- function(x) rgb(colorRamp(c("#fa8072", "white", "#35b0ab"))(x), maxC
 
 table <- reactable(
   nba_gen,
-  columnGroups = list(
-    colGroup(name = "BOX SCORE RAPTOR", columns = box_score_raptor),
-    colGroup(name = "ON/OFF RAPTOR", columns = on_off_raptor),
-    colGroup(name = "OVERALL RAPTOR", columns = overall_raptor)
-  ),
   columns = list(
       raptor_offense = colDef(style = function(value) {
       normalized <- (value - min(nba_gen$raptor_offense)) / (max(nba_gen$raptor_offense) - min(nba_gen$raptor_offense))
       color <- blue_pal(normalized)
       list(background = color)
+      },
+      name = "OFF.",
+      cell = function(value) {
+        if (value >= 0) paste0("+", value) else value
       }),
+      
       raptor_defense = colDef(style = function(value) {
       normalized <- (value - min(nba_gen$raptor_defense)) / (max(nba_gen$raptor_defense) - min(nba_gen$raptor_defense))
       color <- blue_pal(normalized)
       list(background = color)
+      },
+      name = "DEF.",
+      cell = function(value) {
+        if (value >= 0) paste0("+", value) else value
       }),
+      
       raptor_total = colDef(style = function(value) {
       normalized <- (value - min(nba_gen$raptor_total)) / (max(nba_gen$raptor_total) - min(nba_gen$raptor_total))
       color <- blue_pal(normalized)
       list(background = color)
-      })
-  )
+      },
+      name = "TOT.",
+      cell = function(value) {
+        if (value >= 0) paste0("+", value) else value
+      }),
+      
+      raptor_box_offense = colDef(
+      cell = function(value) {
+        if (value >= 0) paste0("+", value) else value
+      },
+      name = "OFF."),
+      
+      raptor_box_defense = colDef(
+      cell = function(value) {
+        if (value >= 0) paste0("+", value) else value
+      },
+      name = "DEF."),
+      
+      raptor_box_total = colDef(
+      cell = function(value) {
+        if (value >= 0) paste0("+", value) else value
+      },
+      name = "TOT."),
+      
+      raptor_onoff_offense = colDef(
+      cell = function(value) {
+        if (value >= 0) paste0("+", value) else value
+      },
+      name = "OFF."),
+      
+      raptor_onoff_defense = colDef(
+      cell = function(value) {
+        if (value >= 0) paste0("+", value) else value
+      },
+      name = "DEF."),
+      
+      raptor_onoff_total = colDef(
+      cell = function(value) {
+        if (value >= 0) paste0("+", value) else value
+      },
+      name = "TOT."),
+      war_total = colDef(name = "WAR",
+                         headerStyle = list(background = "darkgrey"))
+  ),
+  columnGroups = list(
+    colGroup(name = "BOX SCORE RAPTOR", columns = box_score_raptor),
+    colGroup(name = "ON/OFF RAPTOR", columns = on_off_raptor),
+    colGroup(name = "OVERALL RAPTOR", columns = overall_raptor)
+  ),
+  rownames = TRUE
 )
 table
 ```
 
 
 # Things to do: 
-- add +/- symbols
-- change column titles
-- add counts
 - add bold and unbold 
+- add season with player name 
+- highlight WAR column
+- borders
 
 ```{r}
 # # Install and load required packages
