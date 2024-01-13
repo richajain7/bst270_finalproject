@@ -7,6 +7,7 @@ format: html
 ```{r}
 library(reactable)
 library(htmltools)
+library(RColorBrewer)
 ```
 
 ```{r}
@@ -18,7 +19,7 @@ head(latest_raptor_team, 1)
 ```
 
 ```{r}
-unique(latest_raptor_team$season_type) 
+#unique(latest_raptor_team$season_type) 
 #latest_raptor_team [latest_raptor_team$poss == 431]
 ```
 
@@ -32,22 +33,136 @@ head(nba)
 ```
 
 ```{r}
-table_rough <- nba %>% 
-  select(player_name, team, mp, raptor_box_offense, raptor_box_defense, raptor_box_total,
+nba_gen <- nba %>% 
+  select(player_name, season, team, mp, raptor_box_offense, raptor_box_defense, raptor_box_total,
  raptor_onoff_offense, raptor_onoff_defense, raptor_onoff_total, 
- raptor_offense, raptor_defense, raptor_defense, war_total) %>% 
+ raptor_offense, raptor_defense, raptor_defense, raptor_total, war_total) %>% 
   filter(mp >= 1137) %>% 
   arrange(-war_total)
 
-table_rough
+nba_gen
+```
+
+# Note: No column for what position each player played
+
+# Note: rounding is a bit off
+
+```{r}
+box_score_raptor <- c("raptor_box_offense", "raptor_box_defense", "raptor_box_total")
+on_off_raptor <- c("raptor_onoff_offense", "raptor_onoff_defense", "raptor_onoff_total")
+overall_raptor <- c("raptor_offense", "raptor_defense", "raptor_total", "war_total")
+
+nba_gen <- nba_gen[, c("player_name", "season", "team", "mp", box_score_raptor, on_off_raptor, overall_raptor)]
+
+# cols_to_round <- c("raptor_box_offense", "raptor_box_defense", "raptor_box_total",
+#                     "raptor_onoff_offense", "raptor_onoff_defense", "raptor_onoff_total",
+#                     "raptor_offense", "raptor_defense", "raptor_total")
+
+#rounding all numeric columns: 
+
+nba_gen$raptor_box_offense <- format(round(nba_gen$raptor_box_offense, 1), nsmall = 1)
+nba_gen$raptor_box_defense <- format(round(nba_gen$raptor_box_defense, 1), nsmall = 1)
+nba_gen$raptor_box_total <- format(round(nba_gen$raptor_box_total, 1), nsmall = 1)
+nba_gen$raptor_onoff_offense <- format(round(nba_gen$raptor_onoff_offense, 1), nsmall = 1)
+nba_gen$raptor_onoff_defense <- format(round(nba_gen$raptor_onoff_defense, 1), nsmall = 1)
+nba_gen$raptor_onoff_total <- format(round(nba_gen$raptor_onoff_total, 1), nsmall = 1)
+nba_gen$raptor_offense <- format(round(nba_gen$raptor_offense, 1), nsmall = 1)
+nba_gen$raptor_defense <- format(round(nba_gen$raptor_defense, 1), nsmall = 1)
+nba_gen$raptor_total <- format(round(nba_gen$raptor_total, 1), nsmall = 1)
+nba_gen$war_total <- format(round(nba_gen$war_total, 1), nsmall = 1)
+
+head(nba_gen)
 ```
 
 ```{r}
-box_score_raptor <- c("raptor_box_offense, raptor_box_defense, raptor_box_total")
+#rename columns: 
+nba_gen <- nba_gen %>% 
+  rename(
+    PLAYER = player_name,
+    TEAM = team,
+    MINUTES = mp,
+  )
 
+#have to find these on your own
+TEAM <- c("ATL", "BOS", "BKN", "CHA", "CHI", "CLE", "DAL", "DEN", "DET",
+          "GSW", "HOU", "IND", "LAC", "LAL", "MEM", "MIA", "MIL", "MIN",
+          "NOP", "NYK", "OKC", "ORL", "PHI", "PHX", "POR", "SAC", "SAS",
+          "TOR", "UTA", "WAS")
+full_name <- c("Hawks", "Celtics", "Nets", "Hornets", "Bulls", "Cavaliers",
+          "Mavericks", "Nuggets", "Pistons", "Warriors", "Rockets",
+          "Pacers", "Clippers", "Lakers", "Grizzlies", "Heat", "Bucks",
+          "Timberwolves", "Pelicans", "Knicks", "Thunder", "Magic",
+          "76ers", "Suns", "Blazers", "Kings", "Spurs", "Raptors",
+          "Jazz", "Wizards")
+
+nba_teams <- data.frame(
+  TEAM, full_name 
+)
+
+nba_gen <- nba_gen %>% 
+  left_join(select(nba_teams, TEAM, full_name), by = "TEAM")
+
+nba_gen <- nba_gen[, c("PLAYER", "season", "full_name", "MINUTES", box_score_raptor, on_off_raptor, overall_raptor)]
+nba_gen <- nba_gen %>% 
+  rename(
+    TEAM = full_name
+  )
+
+nba_gen$MINUTES <- format(nba_gen$MINUTES,big.mark=", ", trim=TRUE)
+```
+
+```{r}
+#convert columns to numeric:
+nba_gen$raptor_box_offense <- as.numeric(nba_gen$raptor_box_offense)
+nba_gen$raptor_box_defense <- as.numeric(nba_gen$raptor_box_defense)
+nba_gen$raptor_box_total <- as.numeric(nba_gen$raptor_box_total)
+nba_gen$raptor_onoff_offense <- as.numeric(nba_gen$raptor_onoff_offense)
+nba_gen$raptor_onoff_defense <- as.numeric(nba_gen$raptor_onoff_defense)
+nba_gen$raptor_onoff_total <- as.numeric(nba_gen$raptor_onoff_total)
+nba_gen$raptor_offense <- as.numeric(nba_gen$raptor_offense)
+nba_gen$raptor_defense <- as.numeric(nba_gen$raptor_defense)
+nba_gen$raptor_total <- as.numeric(nba_gen$raptor_total)
+nba_gen$war_total <- as.numeric(nba_gen$war_total)
 ```
 
 
+```{r}
+blue_pal <- function(x) rgb(colorRamp(c("#fa8072", "white", "#35b0ab"))(x), maxColorValue = 255)
+
+table <- reactable(
+  nba_gen,
+  columnGroups = list(
+    colGroup(name = "BOX SCORE RAPTOR", columns = box_score_raptor),
+    colGroup(name = "ON/OFF RAPTOR", columns = on_off_raptor),
+    colGroup(name = "OVERALL RAPTOR", columns = overall_raptor)
+  ),
+  columns = list(
+      raptor_offense = colDef(style = function(value) {
+      normalized <- (value - min(nba_gen$raptor_offense)) / (max(nba_gen$raptor_offense) - min(nba_gen$raptor_offense))
+      color <- blue_pal(normalized)
+      list(background = color)
+      }),
+      raptor_defense = colDef(style = function(value) {
+      normalized <- (value - min(nba_gen$raptor_defense)) / (max(nba_gen$raptor_defense) - min(nba_gen$raptor_defense))
+      color <- blue_pal(normalized)
+      list(background = color)
+      }),
+      raptor_total = colDef(style = function(value) {
+      normalized <- (value - min(nba_gen$raptor_total)) / (max(nba_gen$raptor_total) - min(nba_gen$raptor_total))
+      color <- blue_pal(normalized)
+      list(background = color)
+      })
+  )
+)
+table
+```
+
+
+# Things to do: 
+- add +/- symbols
+- change column titles
+- add counts
+- add bold and unbold 
 
 ```{r}
 # # Install and load required packages
