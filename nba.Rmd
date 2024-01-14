@@ -263,7 +263,9 @@ library(plotly)
 
 ```{r}
 fig <- nba_gen %>% 
-  plot_ly(x = ~raptor_offense, y = ~raptor_defense, text = ~paste(PLAYER),
+  plot_ly(x = ~raptor_offense, y = ~raptor_defense, text = ~paste(PLAYER, " '22-'", season, " ", TEAM,
+                                                                  " \n", "Offensive RAPTOR: ", raptor_offense,
+                                                                  " \n", "Defensive RAPTOR: ", raptor_defense),
           type = "scatter", mode = "markers") %>% 
   layout(#annotations = list(text = "- offense", x = -9, y = 9, showarrow = FALSE, fill = "pink",
         #                    text = "+ defense", x = -9, y = 8, showarrow = FALSE),
@@ -377,9 +379,6 @@ fig <- fig %>% layout(
   
 fig
 ```
-
-to do: 
-- make interactive by player
 
 sources: https://plotly.com/r/figure-labels/
 https://plotly.com/r/plotly-fundamentals/
