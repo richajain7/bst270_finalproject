@@ -1,6 +1,7 @@
 ---
-title: "nba"
-format: pdf
+title: "test"
+output: html_document
+date: "2024-01-14"
 ---
 
 ```{r}
@@ -266,6 +267,3 @@ table <- reactable(
 )
 table
 ```
-
-
-
