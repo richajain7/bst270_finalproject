@@ -49,6 +49,8 @@ nba_gen
 
 # Note: rounding is a bit off
 
+# Note: number of rows does not match. 
+
 ```{r}
 box_score_raptor <- c("raptor_box_offense", "raptor_box_defense", "raptor_box_total")
 on_off_raptor <- c("raptor_onoff_offense", "raptor_onoff_defense", "raptor_onoff_total")
@@ -137,11 +139,14 @@ table <- reactable(
   columns = list(
     PLAYER = colDef(
       cell = function(value, index) {
+        #season <- nba_gen$season[index]
         div(
           class = "player",
           div(
-            span(class = "player", value),
-            span(class = "season", sprintf(" '22-'%s", nba_gen[index, "season"]))
+            span(class = "player", value, style = list(fontSize = "0.95rem")),
+            span(class = "season", sprintf(" '22-'%s", nba_gen[index, "season"]),
+                 style = list(fontSize = "0.75rem"))
+            #div(style = list(fontSize = "0.75rem"), season)
           )
         )
       }
@@ -177,6 +182,7 @@ table <- reactable(
       normalized <- (value - min(nba_gen$raptor_total)) / (max(nba_gen$raptor_total) - min(nba_gen$raptor_total))
       color <- blue_pal(normalized)
       list(background = color)
+      
       },
       name = "TOT.",
       cell = function(value) {
@@ -237,7 +243,11 @@ table <- reactable(
                          headerStyle = list(background = "darkgrey",
                                             color = "white",
                                             fontWeight = "700",
-                                            fontSize = "0.75rem"))
+                                            fontSize = "0.75rem"),
+                         style = function(value, index, name){
+                            list(fontWeight = "bold")
+                         }
+                         )
   ),
   columnGroups = list(
     colGroup(name = "BOX SCORE RAPTOR", columns = box_score_raptor, headerStyle = list(fontSize = "0.75rem")),
@@ -249,12 +259,6 @@ table <- reactable(
 )
 table
 ```
-
-
-# Things to do: 
-- add season with player name 
-- bold values in war column
-- borders
 
 ```{r}
 # # Install and load required packages
