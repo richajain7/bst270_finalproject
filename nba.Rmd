@@ -16,7 +16,6 @@ library(RColorBrewer)
 library(DT)
 library(tidyverse)
 library(dplyr)
-#https://projects.fivethirtyeight.com/nba-player-ratings/
 ```
 
 ```{r, echo = FALSE}
@@ -41,11 +40,9 @@ nba_gen <- nba %>%
   arrange(-war_total)
 ```
 
-#Note: No column for what position each player played
-
-#Note: rounding is a bit off
-
-#Note: number of rows does not match. 
+- Note: No column for what position each player played
+- Note: rounding is a bit off
+- Note: number of rows does not match possibly due to lack of information on filtering. 
 
 ```{r, echo = FALSE}
 box_score_raptor <- c("raptor_box_offense", "raptor_box_defense", "raptor_box_total")
@@ -54,21 +51,13 @@ overall_raptor <- c("raptor_offense", "raptor_defense", "raptor_total", "war_tot
 
 nba_gen <- nba_gen[, c("player_name", "season", "team", "mp", box_score_raptor, on_off_raptor, overall_raptor)]
 
-# cols_to_round <- c("raptor_box_offense", "raptor_box_defense", "raptor_box_total",
-#                     "raptor_onoff_offense", "raptor_onoff_defense", "raptor_onoff_total",
-#                     "raptor_offense", "raptor_defense", "raptor_total")
+cols_to_round <- c("raptor_box_offense", "raptor_box_defense", "raptor_box_total",
+                    "raptor_onoff_offense", "raptor_onoff_defense", "raptor_onoff_total",
+                    "raptor_offense", "raptor_defense", "raptor_total", "war_total")
 
-#rounding all numeric columns: 
-nba_gen$raptor_box_offense <- format(round(nba_gen$raptor_box_offense, 1), nsmall = 1)
-nba_gen$raptor_box_defense <- format(round(nba_gen$raptor_box_defense, 1), nsmall = 1)
-nba_gen$raptor_box_total <- format(round(nba_gen$raptor_box_total, 1), nsmall = 1)
-nba_gen$raptor_onoff_offense <- format(round(nba_gen$raptor_onoff_offense, 1), nsmall = 1)
-nba_gen$raptor_onoff_defense <- format(round(nba_gen$raptor_onoff_defense, 1), nsmall = 1)
-nba_gen$raptor_onoff_total <- format(round(nba_gen$raptor_onoff_total, 1), nsmall = 1)
-nba_gen$raptor_offense <- format(round(nba_gen$raptor_offense, 1), nsmall = 1)
-nba_gen$raptor_defense <- format(round(nba_gen$raptor_defense, 1), nsmall = 1)
-nba_gen$raptor_total <- format(round(nba_gen$raptor_total, 1), nsmall = 1)
-nba_gen$war_total <- format(round(nba_gen$war_total, 1), nsmall = 1)
+for(i in cols_to_round){
+  nba_gen[[i]] <- format(round(nba_gen[[i]], 1), nsmall = 1)
+}
 ```
 
 ```{r, echo = FALSE}
@@ -111,16 +100,10 @@ nba_gen$season <- nba_gen$season %% 100
 
 ```{r, echo = FALSE}
 #convert columns to numeric:
-nba_gen$raptor_box_offense <- as.numeric(nba_gen$raptor_box_offense)
-nba_gen$raptor_box_defense <- as.numeric(nba_gen$raptor_box_defense)
-nba_gen$raptor_box_total <- as.numeric(nba_gen$raptor_box_total)
-nba_gen$raptor_onoff_offense <- as.numeric(nba_gen$raptor_onoff_offense)
-nba_gen$raptor_onoff_defense <- as.numeric(nba_gen$raptor_onoff_defense)
-nba_gen$raptor_onoff_total <- as.numeric(nba_gen$raptor_onoff_total)
-nba_gen$raptor_offense <- as.numeric(nba_gen$raptor_offense)
-nba_gen$raptor_defense <- as.numeric(nba_gen$raptor_defense)
-nba_gen$raptor_total <- as.numeric(nba_gen$raptor_total)
-nba_gen$war_total <- as.numeric(nba_gen$war_total)
+
+for(i in cols_to_round){
+  nba_gen[[i]] <- as.numeric(nba_gen[[i]])
+}
 ```
 
 
@@ -256,12 +239,12 @@ table
 
 ## Scatterplot
 
-```{r}
+```{r, echo = FALSE}
 library(plotly)
 ```
 
 
-```{r}
+```{r, echo = FALSE}
 fig <- nba_gen %>% 
   plot_ly(x = ~raptor_offense, y = ~raptor_defense, text = ~paste(PLAYER, " '22-'", season, " ", TEAM,
                                                                   " \n", "Offensive RAPTOR: ", raptor_offense,
