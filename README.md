@@ -7,3 +7,8 @@ This repository is for my final project for BST 270. It attempts to reproduce th
 ## Setting up the environment
 
 ## Resources
+
+The following links helped me recreate the graph and table of this article:
+[Plotly](https://plotly.com/r/figure-labels/)
+[Plotly](https://plotly.com/r/plotly-fundamentals/)
+[Reactable](https://glin.github.io/reactable/articles/womens-world-cup/womens-world-cup.html)

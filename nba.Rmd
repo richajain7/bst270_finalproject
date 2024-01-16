@@ -363,30 +363,6 @@ fig <- fig %>% layout(
 fig
 ```
 
-sources: https://plotly.com/r/figure-labels/
-https://plotly.com/r/plotly-fundamentals/
-https://glin.github.io/reactable/articles/womens-world-cup/womens-world-cup.html
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
