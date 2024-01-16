@@ -6,22 +6,40 @@ output: html_document
 author: "Richa Jain"
 ---
 
-```{r, echo = FALSE}
-library(knitr)
-library(reactable)
-library(htmltools)
-library(RColorBrewer)
-library(DT)
-library(tidyverse)
-library(dplyr)
+## Project
+
+This project attempts to reproduce the graph and table from FiveThirtyEight's [The Best NBA Players, According To RAPTOR](https://projects.fivethirtyeight.com/nba-player-ratings/)
+
+## Load necessary packages
+
+I used pacman for this as it cleans up code and installs and loads the needed packages.
+
+```{r, message = FALSE, echo = FALSE}
+# load relevant packages 
+if (!require('pacman')) {
+    install.packages('pacman')
+} 
+pacman::p_load('knitr', 'reactable', 'htmltools', 'RColorBrewer', 'DT', 'tidyverse', 'dplyr', 'plotly')
 ```
 
+## Load data
+
+The first step to reproducing the table and graph is to download the data. 
+We use two datasets: one for RAPTOR information by player and one for RAPTOR information by team. 
+Both datasets can be found on [FiveThirtyEight's GitHub](https://github.com/fivethirtyeight/data/tree/master/nba-raptor).
+We use the datasets labeled at 'latest' for these figures. 
+
 ```{r, echo = FALSE}
+#set wd:
+setwd("/Users/richajain/Library/Mobile Documents/com~apple~CloudDocs/Harvard/Harvard Winter 2024/BST270/bst270-finalproject/bst270_finalproject")
+#load data from dataset folder
 latest_raptor_player <- read.csv("datasets/latest_RAPTOR_by_player.csv") 
 latest_raptor_team <- read.csv("datasets/latest_RAPTOR_by_team.csv") 
 ```
 
-- Note : We can't reproduce the table perfectly because the positions must have been manually added in
+## Data Wrangling
+
+The datasets we loaded need to be joined together so the first step is to create the dataframe that we need to reproduce both of these figures by using a left join and selecting only the relevant variables. The article says that they included players who played in at least 70% of their team's games and averaged at least 24 minutes per game. There was no data on what percentage of games each player played in, so the filtering is slightly off and results in extra rows and extra data points. 
 
 ```{r, echo = FALSE}
 nba <- latest_raptor_player %>% 
@@ -38,9 +56,29 @@ nba_gen <- nba %>%
   arrange(-war_total)
 ```
 
-- Note: No column for what position each player played
-- Note: rounding is a bit off
-- Note: number of rows does not match possibly due to lack of information on filtering. 
+
+### Reproducibility Comment 
+
+While perform basic data wrangling, I noticed that the table that FiveThirtyEight created has a column for player positions. However, the datasets provided do not contain information on what position each player played. This is something that would need to be manually researched and added in. Therefore, we can recreate much of the original table, but cannot add in this column. 
+
+Additionally, there is data on the teams that each player played for; however, it is abbreviated, so to get the column to look like the article, I had to manually research and add in the unabbreviated version. The data does not contain the right information. 
+
+Another issue that I faced was that FiveThirtyEight's figures are interactive. I, unfortunately, could not figure out how to make my reproduced figures as interactive, so I had a specific filter that I set everything to and recreated those figures. 
+
+**Note: To reproduce this, please set FiveThirtyEight's filters to the following:**
+
+1. Season: '22-'23
+1. Season Type: Full Season
+1. Minimum Minutes Played: 1137
+1. Team: All Teams
+1. Position: All Positions
+1. Years of Experience: Any number
+
+## Reproduce Table
+
+### Comments on constructing the table
+
+I used reactable to recreate the table shown in the article. I had to rename some of the columns, add in the unabbreviated version of the team names, and reformat the minutes played and season columns. 
 
 ```{r, echo = FALSE}
 box_score_raptor <- c("raptor_box_offense", "raptor_box_defense", "raptor_box_total")
@@ -57,8 +95,6 @@ for(i in cols_to_round){
   nba_gen[[i]] <- format(round(nba_gen[[i]], 1), nsmall = 1)
 }
 ```
-
-- Make sure to swipe to see all the columns
 
 ```{r, echo = FALSE}
 #rename columns: 
@@ -104,7 +140,6 @@ for(i in cols_to_round){
   nba_gen[[i]] <- as.numeric(nba_gen[[i]])
 }
 ```
-
 
 ```{r, echo = FALSE}
 blue_pal <- function(x) rgb(colorRamp(c("#fa8072", "white", "#35b0ab"))(x), maxColorValue = 255)
@@ -236,13 +271,17 @@ table <- reactable(
 table
 ```
 
+### Some Notes (Table)
 
-## Scatterplot
+1. Make sure to swipe to see all the columns. 
+2. Rounding and some formatting is a bit off due to my lack of experience using reactable. 
+4. Number of rows does not match possibly due to lack of information on filtering for 70% of games played. 
 
-```{r, echo = FALSE}
-library(plotly)
-```
+## Reproduce Scatterplot
 
+### Comments on constructing the scatterplot
+
+For this I used the plotly library and I used the dataset I constructed for the table above. 
 
 ```{r, echo = FALSE}
 fig <- nba_gen %>% 
@@ -363,7 +402,11 @@ fig <- fig %>% layout(
 fig
 ```
 
+### Some Notes (Scatterplot)
 
+1. Again, some of the formatting is slightly off due to my lack of experience using plotly
 
+## Remarks on Reproducibility
 
+I was able to reproduce the table and graph to look about the same as FiveThirtyEight; however, I was unable to get the correct number of rows/players in the table which results in extra data points in the graph. The article was not too clear on how they filtered for players who played in at least 70% of their teams games. I also was not able to reproduce what position was played by each player as I did not have that information and there is not available dataset on the internet that would have been easy to bring in. Overall, I had most of the information I needed and was slightly off with my figures due to either lack of data or lack of experience with the libraries. 
 
