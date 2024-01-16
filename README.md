@@ -5,3 +5,5 @@ This repository is for my final project for BST 270. It attempts to reproduce th
 ## Project Structure
 
 ## Setting up the environment
+
+## Resources

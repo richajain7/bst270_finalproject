@@ -1,15 +1,13 @@
 ---
-title: "nba"
+title: "The Best NBA Players, According To Raptor"
+subtitle: "FiveThirtyEight BST 270 Individual Project"
 output: html_document
-date: "2024-01-14"
+#date: "2024-01-14"
+author: "Richa Jain"
 ---
 
 ```{r, echo = FALSE}
 library(knitr)
-```
-
-
-```{r, echo = FALSE}
 library(reactable)
 library(htmltools)
 library(RColorBrewer)
@@ -23,7 +21,7 @@ latest_raptor_player <- read.csv("datasets/latest_RAPTOR_by_player.csv")
 latest_raptor_team <- read.csv("datasets/latest_RAPTOR_by_team.csv") 
 ```
 
-#Note : We can't reproduce the table perfectly because the positions must have been manually added in
+- Note : We can't reproduce the table perfectly because the positions must have been manually added in
 
 ```{r, echo = FALSE}
 nba <- latest_raptor_player %>% 
@@ -59,6 +57,8 @@ for(i in cols_to_round){
   nba_gen[[i]] <- format(round(nba_gen[[i]], 1), nsmall = 1)
 }
 ```
+
+- Make sure to swipe to see all the columns
 
 ```{r, echo = FALSE}
 #rename columns: 
@@ -100,7 +100,6 @@ nba_gen$season <- nba_gen$season %% 100
 
 ```{r, echo = FALSE}
 #convert columns to numeric:
-
 for(i in cols_to_round){
   nba_gen[[i]] <- as.numeric(nba_gen[[i]])
 }
@@ -231,7 +230,8 @@ table <- reactable(
   ),
   rownames = TRUE,
   defaultColDef = colDef(headerStyle = list(fontSize = "0.75rem")),
-  defaultPageSize = 300
+  defaultPageSize = 300,
+  width = 800
 )
 table
 ```
