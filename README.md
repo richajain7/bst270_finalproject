@@ -9,7 +9,7 @@ The entire project is in `./nba.Rmd`. `.Rmd` is an RMarkdown file and can be com
 ### Data Overview
 
 The data used for this project is publicly available and was downloaded through FiveThirtyEight's Data GitHub. The downloaded datasets are in the datasets subfolder. I used  `https://projects.fivethirtyeight.com/nba-model/2023/latest_RAPTOR_by_team.csv` and `https://projects.fivethirtyeight.com/nba-model/2023/latest_RAPTOR_by_player.csv`.
-The GitHub page linked above has a description of each column. 
+[FiveThirtyEight's GitHub page](https://github.com/fivethirtyeight/data/tree/master/nba-raptor) has a description of each column. 
 
 ### Resources
 
