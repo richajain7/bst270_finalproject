@@ -15,7 +15,7 @@ This project attempts to reproduce the graph and table from FiveThirtyEight's [T
 I used pacman for this as it cleans up code and installs and loads the needed packages.
 
 ```{r, message = FALSE, echo = FALSE}
-# load relevant packages 
+# load relevant packages - using pacman
 if (!require('pacman')) {
     install.packages('pacman')
 } 
@@ -30,9 +30,9 @@ Both datasets can be found on [FiveThirtyEight's GitHub](https://github.com/five
 We use the datasets labeled at 'latest' for these figures. 
 
 ```{r, echo = FALSE}
-#set wd:
+# set wd:
 setwd("/Users/richajain/Library/Mobile Documents/com~apple~CloudDocs/Harvard/Harvard Winter 2024/BST270/bst270-finalproject/bst270_finalproject")
-#load data from dataset folder
+# load data from dataset folder
 latest_raptor_player <- read.csv("datasets/latest_RAPTOR_by_player.csv") 
 latest_raptor_team <- read.csv("datasets/latest_RAPTOR_by_team.csv") 
 ```
@@ -42,18 +42,23 @@ latest_raptor_team <- read.csv("datasets/latest_RAPTOR_by_team.csv")
 The datasets we loaded need to be joined together so the first step is to create the dataframe that we need to reproduce both of these figures by using a left join and selecting only the relevant variables. The article says that they included players who played in at least 70% of their team's games and averaged at least 24 minutes per game. There was no data on what percentage of games each player played in, so the filtering is slightly off and results in extra rows and extra data points. 
 
 ```{r, echo = FALSE}
+# left join the team dataset and the player dataset 
+# select distinct rows (there are duplicates)
 nba <- latest_raptor_player %>% 
   left_join(select(latest_raptor_team, player_name, team), by = "player_name") %>% 
   distinct()
 ```
 
 ```{r, echo = FALSE}
+# select only the relevant variables 
+# filter and sort based on article details
 nba_gen <- nba %>% 
   select(player_name, season, team, mp, raptor_box_offense, raptor_box_defense, raptor_box_total,
  raptor_onoff_offense, raptor_onoff_defense, raptor_onoff_total, 
  raptor_offense, raptor_defense, raptor_defense, raptor_total, war_total) %>% 
   filter(mp >= 1137) %>% 
   arrange(-war_total)
+# this code chunk created the final dataframe and everything after just formats it/turns it into a graph
 ```
 
 
@@ -81,12 +86,14 @@ Another issue that I faced was that FiveThirtyEight's figures are interactive. I
 I used reactable to recreate the table shown in the article. I had to rename some of the columns, add in the unabbreviated version of the team names, and reformat the minutes played and season columns. 
 
 ```{r, echo = FALSE}
+#create the grouped columns for reproducing the table
 box_score_raptor <- c("raptor_box_offense", "raptor_box_defense", "raptor_box_total")
 on_off_raptor <- c("raptor_onoff_offense", "raptor_onoff_defense", "raptor_onoff_total")
 overall_raptor <- c("raptor_offense", "raptor_defense", "raptor_total", "war_total")
 
 nba_gen <- nba_gen[, c("player_name", "season", "team", "mp", box_score_raptor, on_off_raptor, overall_raptor)]
 
+#round numeric columns to 1 decimal place
 cols_to_round <- c("raptor_box_offense", "raptor_box_defense", "raptor_box_total",
                     "raptor_onoff_offense", "raptor_onoff_defense", "raptor_onoff_total",
                     "raptor_offense", "raptor_defense", "raptor_total", "war_total")
@@ -97,7 +104,7 @@ for(i in cols_to_round){
 ```
 
 ```{r, echo = FALSE}
-#rename columns: 
+# rename columns to match table from article: 
 nba_gen <- nba_gen %>% 
   rename(
     PLAYER = player_name,
@@ -105,7 +112,8 @@ nba_gen <- nba_gen %>%
     MINUTES = mp,
   )
 
-#have to find these on your own
+# get the unabbreviate version of all the nba team names
+# have to find these on your own
 TEAM <- c("ATL", "BOS", "BKN", "CHA", "CHI", "CLE", "DAL", "DEN", "DET",
           "GSW", "HOU", "IND", "LAC", "LAL", "MEM", "MIA", "MIL", "MIN",
           "NOP", "NYK", "OKC", "ORL", "PHI", "PHX", "POR", "SAC", "SAS",
@@ -121,16 +129,21 @@ nba_teams <- data.frame(
   TEAM, full_name 
 )
 
+# left join the team names to the dataset
 nba_gen <- nba_gen %>% 
   left_join(select(nba_teams, TEAM, full_name), by = "TEAM")
 
+# select all the columns but replace the team name with the unabbreviated version
+# rename team column
 nba_gen <- nba_gen[, c("PLAYER", "season", "full_name", "MINUTES", box_score_raptor, on_off_raptor, overall_raptor)]
 nba_gen <- nba_gen %>% 
   rename(
     TEAM = full_name
   )
 
+# reformat the minutes played column to include a comma
 nba_gen$MINUTES <- format(nba_gen$MINUTES,big.mark=", ", trim=TRUE)
+# reformat the season column to only include the last 2 digits of the year (2023 to 23)
 nba_gen$season <- nba_gen$season %% 100
 ```
 
@@ -142,28 +155,29 @@ for(i in cols_to_round){
 ```
 
 ```{r, echo = FALSE}
+# this code chunk creates the reactable for recreating the table in the article
+
+# create color palette for table
 blue_pal <- function(x) rgb(colorRamp(c("#fa8072", "white", "#35b0ab"))(x), maxColorValue = 255)
 
 table <- reactable(
   nba_gen,
   columns = list(
+    #this first part adds the season to the player column 
     PLAYER = colDef(
       cell = function(value, index) {
-        #season <- nba_gen$season[index]
         div(
           class = "player",
           div(
             span(class = "player", value),
             span(class = "season", sprintf(" '22-'%s", nba_gen[index, "season"]),
                  style = list(fontSize = "0.75rem"))
-            #div(style = list(fontSize = "0.75rem"), season)
           )
         )
       }
     ),
     season = colDef(show = FALSE),
-    
-      raptor_offense = colDef(style = function(value) {
+    raptor_offense = colDef(style = function(value) {
       normalized <- (value - min(nba_gen$raptor_offense)) / (max(nba_gen$raptor_offense) - min(nba_gen$raptor_offense))
       color <- blue_pal(normalized)
       list(background = color)
@@ -174,8 +188,9 @@ table <- reactable(
       },
       headerStyle = list(fontWeight = "100",
                          fontSize = "0.75rem")),
-      
-      raptor_defense = colDef(style = function(value) {
+    # these next few chunks reformat the columns to add color based on the values
+    # also adds a + in front of positive values
+    raptor_defense = colDef(style = function(value) {
       normalized <- (value - min(nba_gen$raptor_defense)) / (max(nba_gen$raptor_defense) - min(nba_gen$raptor_defense))
       color <- blue_pal(normalized)
       list(background = color)
@@ -187,7 +202,7 @@ table <- reactable(
       headerStyle = list(fontWeight = "100",
                          fontSize = "0.75rem")),
       
-      raptor_total = colDef(style = function(value) {
+    raptor_total = colDef(style = function(value) {
       normalized <- (value - min(nba_gen$raptor_total)) / (max(nba_gen$raptor_total) - min(nba_gen$raptor_total))
       color <- blue_pal(normalized)
       list(background = color)
@@ -200,7 +215,7 @@ table <- reactable(
       headerStyle = list(fontWeight = "100",
                          fontSize = "0.75rem")),
       
-      raptor_box_offense = colDef(
+    raptor_box_offense = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
@@ -208,7 +223,7 @@ table <- reactable(
       headerStyle = list(fontWeight = "100",
                          fontSize = "0.75rem")),
       
-      raptor_box_defense = colDef(
+    raptor_box_defense = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
@@ -216,7 +231,7 @@ table <- reactable(
       headerStyle = list(fontWeight = "100",
                          fontSize = "0.75rem")),
       
-      raptor_box_total = colDef(
+    raptor_box_total = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
@@ -224,7 +239,7 @@ table <- reactable(
       headerStyle = list(fontWeight = "100",
                          fontSize = "0.75rem")),
       
-      raptor_onoff_offense = colDef(
+    raptor_onoff_offense = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
@@ -232,7 +247,7 @@ table <- reactable(
       headerStyle = list(fontWeight = "100",
                          fontSize = "0.75rem")),
       
-      raptor_onoff_defense = colDef(
+    raptor_onoff_defense = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
@@ -240,7 +255,7 @@ table <- reactable(
       headerStyle = list(fontWeight = "100",
                          fontSize = "0.75rem")),
       
-      raptor_onoff_total = colDef(
+    raptor_onoff_total = colDef(
       cell = function(value) {
         if (value >= 0) paste0("+", value) else value
       },
@@ -248,7 +263,7 @@ table <- reactable(
       headerStyle = list(fontWeight = "100",
                          fontSize = "0.75rem")),
       
-      war_total = colDef(name = "WAR",
+    war_total = colDef(name = "WAR",
                          headerStyle = list(background = "darkgrey",
                                             color = "white",
                                             fontWeight = "700",
@@ -258,6 +273,7 @@ table <- reactable(
                          }
                          )
   ),
+  # this next chunk groups the columns under certain headers
   columnGroups = list(
     colGroup(name = "BOX SCORE RAPTOR", columns = box_score_raptor, headerStyle = list(fontSize = "0.75rem")),
     colGroup(name = "ON/OFF RAPTOR", columns = on_off_raptor, headerStyle = list(fontSize = "0.75rem")),
@@ -284,14 +300,15 @@ table
 For this I used the plotly library and I used the dataset I constructed for the table above. 
 
 ```{r, echo = FALSE}
+# this code chunk creates the graph from the article
+# the part that says text = creates the labels for each data point in the graph
 fig <- nba_gen %>% 
   plot_ly(x = ~raptor_offense, y = ~raptor_defense, text = ~paste(PLAYER, " '22-'", season, " ", TEAM,
                                                                   " \n", "Offensive RAPTOR: ", raptor_offense,
                                                                   " \n", "Defensive RAPTOR: ", raptor_defense),
           type = "scatter", mode = "markers") %>% 
-  layout(#annotations = list(text = "- offense", x = -9, y = 9, showarrow = FALSE, fill = "pink",
-        #                    text = "+ defense", x = -9, y = 8, showarrow = FALSE),
-         title = "Where every player in the NBA stands, according to RAPTOR",
+  # the layout section creates and formats the axes labels
+  layout(title = "Where every player in the NBA stands, according to RAPTOR",
          xaxis = list(title = "Offensive RAPTOR rating",
                       range = c(-11, 11),
                       ticktext = list("-10", "-5", "0", "+5", "+10"), 
@@ -304,6 +321,7 @@ fig <- nba_gen %>%
                       tickvals = list(-10, -5, 0, 5, 10),
                       zerolinecolor = "lightgrey",
                       gridcolor = "lightgrey")) 
+# the following code adds multiple annotations to add in the offense/defense indicators in each quadrant
 fig <- fig %>% add_annotations(
   x = -9,
   y = 9,
@@ -371,7 +389,7 @@ fig <- fig %>%
       )
   )) 
 fig <- fig %>% layout(showlegend = FALSE)
-#top right:
+# these next couple code chunks color in the top right and bottom left quadrants of the graph
 fig <- fig %>% layout(
   shapes = list(
     list(
